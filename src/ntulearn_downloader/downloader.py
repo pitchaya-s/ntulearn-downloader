@@ -11,7 +11,7 @@ from urllib.parse import unquote, urlsplit
 
 from .auth import resolve_cookie
 from .client import BbRouterExpiredError, BlackboardAPIError, NTULearnClient
-from .courses import choose_courses, list_courses
+from .courses import choose_courses, filter_courses_by_time, list_courses
 from .parsers import extract_all_files
 
 BASE_URL = os.getenv(
@@ -349,6 +349,12 @@ async def run(args: argparse.Namespace) -> int:
                 courses,
                 args.course or [],
             )
+
+        selected = filter_courses_by_time(
+            selected,
+            year=args.year,
+            semester=args.semester,
+        )
 
         if not selected:
             print("No matching NTULearn courses found.")

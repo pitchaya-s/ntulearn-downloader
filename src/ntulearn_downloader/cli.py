@@ -8,6 +8,16 @@ import sys
 from .downloader import run
 
 
+def _parse_year(value: str) -> int:
+    if not value.isdecimal() or len(value) not in {2, 4}:
+        raise argparse.ArgumentTypeError(
+            "year must be 2 or 4 digits, such as 25 or 2025"
+        )
+
+    year = int(value)
+    return year + 2000 if len(value) == 2 else year
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="ntulearn-download",
@@ -41,6 +51,23 @@ def build_parser() -> argparse.ArgumentParser:
         "--include-disabled",
         action="store_true",
         help="Include unavailable/old courses.",
+    )
+
+    parser.add_argument(
+        "-y",
+        "--year",
+        type=_parse_year,
+        metavar="YEAR",
+        help="Filter by academic year start (e.g. 2025 or 25).",
+    )
+
+    parser.add_argument(
+        "-s",
+        "--semester",
+        type=int,
+        choices=(1, 2),
+        metavar="1|2",
+        help="Filter by semester.",
     )
 
     parser.add_argument(

@@ -20,7 +20,13 @@ line.
 * [`uv`](https://docs.astral.sh/uv/)
 * an active login to `https://ntulearn.ntu.edu.sg` in Firefox, Chrome, Edge, or Brave
 
-If browser auto-read fails, set `NTULEARN_COOKIE` to your `BbRouter` cookie value manually.
+Set `NTULEARN_COOKIE` to use a specific `BbRouter` cookie. It can also be read
+from a `.env` file in the directory where you run the command; `.env` values are
+used when no non-empty value is set in your shell.
+
+```dotenv
+NTULEARN_COOKIE=expires:...,id:...,sessionId:...,signature:...,site:...,timeout:...,user:...,v:2,xsrf:...
+```
 
 ## Install / run
 
@@ -90,6 +96,18 @@ Include old/unavailable enrollments:
 uv run ntulearn-download --all --include-disabled
 ```
 
+Filter courses by academic year and semester:
+
+```bash
+uv run ntulearn-download --all --year 2025 --semester 1
+uv run ntulearn-download --all -y 25 -s 1
+```
+
+The year is the first year in the academic-year label (for example, `2025` in
+`AY2025-26`); either its two-digit or four-digit form is accepted. These filters
+use year and semester labels in course names, so courses without those labels
+cannot be matched by the corresponding filter.
+
 Force redownload of files that already exist:
 
 ```bash
@@ -106,8 +124,8 @@ uv run ntulearn-download --all -o ~/NTULearn
 
 The downloader follows this order:
 
-1. read a fresh `BbRouter` cookie from a logged-in browser
-2. use `NTULEARN_COOKIE` if provided
+1. use `NTULEARN_COOKIE` from the shell or `.env` file
+2. read a fresh `BbRouter` cookie from a logged-in browser
 3. use the last cached cookie saved by `ntulearn-mcp`
 
 If NTULearn returns HTTP 401, open NTULearn in your browser, complete SSO/MFA,

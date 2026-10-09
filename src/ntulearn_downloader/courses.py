@@ -1,8 +1,18 @@
 """Discover and filter the user's NTULearn courses."""
 
+import re
 from typing import Any
 
 from .client import NTULearnClient
+
+_ACADEMIC_YEAR_RE = re.compile(
+    r"(?<!\d)(?:AY\s*)?((?:19|20)?\d{2})\s*[-/–]\s*(?:20)?\d{2}(?!\d)",
+    re.IGNORECASE,
+)
+_SEMESTER_RE = re.compile(
+    r"\b(?:semester|sem)\s*([12])\b",
+    re.IGNORECASE,
+)
 
 
 async def list_courses(
@@ -82,3 +92,36 @@ def choose_courses(
             for p in patterns
         )
     ]
+
+
+def filter_courses_by_time(
+    courses: list[dict[str, Any]],
+    *,
+    year: int | None = None,
+    semester: int | None = None,
+) -> list[dict[str, Any]]:
+    if year is None and semester is None:
+        return courses
+
+    selected = []
+
+    for course in courses:
+        title = str(course.get("title", ""))
+
+        if year is not None:
+            start_years = {
+                int(value) + (2000 if len(value) == 2 else 0)
+                for value in _ACADEMIC_YEAR_RE.findall(title)
+            }
+            if year not in start_years:
+                continue
+
+        if (
+            semester is not None
+            and str(semester) not in _SEMESTER_RE.findall(title)
+        ):
+            continue
+
+        selected.append(course)
+
+    return selected

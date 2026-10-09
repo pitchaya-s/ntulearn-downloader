@@ -1,9 +1,6 @@
-from ntulearn_downloader.cli import (
-    build_parser,
-    choose_courses,
-    filename_from_url,
-    sanitize_component,
-)
+from ntulearn_downloader.cli import build_parser
+from ntulearn_downloader.courses import choose_courses
+from ntulearn_downloader.downloader import filename_from_url, sanitize_component
 
 
 def test_sanitize_component():
@@ -37,3 +34,12 @@ def test_parser_accepts_course():
     args = parser.parse_args(["-c", "SC2001"])
     assert args.all is False
     assert args.course == ["SC2001"]
+
+
+def test_parser_accepts_short_and_full_year_and_semester():
+    parser = build_parser()
+    short = parser.parse_args(["--all", "-y", "25", "-s", "1"])
+    full = parser.parse_args(["--all", "--year", "2025", "--semester", "1"])
+
+    assert short.year == full.year == 2025
+    assert short.semester == full.semester == 1
