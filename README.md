@@ -99,14 +99,15 @@ uv run ntulearn-download --all --include-disabled
 Filter courses by academic year and semester:
 
 ```bash
-uv run ntulearn-download --all --year 2025 --semester 1
+uv run ntulearn-download --all --year 2026 --semester 1
 uv run ntulearn-download --all -y 25 -s 1
+uv run ntulearn-download --all -y 26 -s 1
 ```
 
-The year is the first year in the academic-year label (for example, `2025` in
-`AY2025-26`); either its two-digit or four-digit form is accepted. These filters
-use year and semester labels in course names, so courses without those labels
-cannot be matched by the corresponding filter.
+The year matches either year in an academic-year label, so `2025`, `25`, `2026`,
+and `26` all match `AY2025-26`. Semester filters recognize labels such as
+`Semester 1` and compact tags such as `26S1`. These filters use the course name
+or ID, so courses without matching labels cannot be selected by them.
 
 Force redownload of files that already exist:
 

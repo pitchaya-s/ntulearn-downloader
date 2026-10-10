@@ -6,7 +6,11 @@ from typing import Any
 from .client import NTULearnClient
 
 _ACADEMIC_YEAR_RE = re.compile(
-    r"(?<!\d)(?:AY\s*)?((?:19|20)?\d{2})\s*[-/–]\s*(?:20)?\d{2}(?!\d)",
+    r"(?<!\d)(?:AY\s*)?((?:19|20)?\d{2})\s*[-/–]\s*((?:20)?\d{2})(?!\d)",
+    re.IGNORECASE,
+)
+_COMPACT_TERM_RE = re.compile(
+    r"(?<![A-Z0-9])(?:AY\s*)?((?:20)?\d{2})\s*S([12])\b",
     re.IGNORECASE,
 )
 _SEMESTER_RE = re.compile(
@@ -57,6 +61,7 @@ async def list_courses(
         result.append(
             {
                 "id": course_id,
+                "courseId": course.get("courseId"),
                 "title": (
                     course.get("name")
                     or course.get("displayName")
@@ -106,19 +111,30 @@ def filter_courses_by_time(
     selected = []
 
     for course in courses:
-        title = str(course.get("title", ""))
+        label = " ".join(
+            str(course.get(field) or "")
+            for field in ("title", "id", "courseId")
+        )
+        compact_terms = _COMPACT_TERM_RE.findall(label)
 
         if year is not None:
-            start_years = {
+            labeled_years = {
                 int(value) + (2000 if len(value) == 2 else 0)
-                for value in _ACADEMIC_YEAR_RE.findall(title)
+                for academic_year in _ACADEMIC_YEAR_RE.findall(label)
+                for value in academic_year
             }
-            if year not in start_years:
+            labeled_years.update(
+                int(value) + (2000 if len(value) == 2 else 0)
+                for value, _ in compact_terms
+            )
+            if year not in labeled_years:
                 continue
 
+        semesters = set(_SEMESTER_RE.findall(label))
+        semesters.update(semester_label for _, semester_label in compact_terms)
         if (
             semester is not None
-            and str(semester) not in _SEMESTER_RE.findall(title)
+            and str(semester) not in semesters
         ):
             continue
 

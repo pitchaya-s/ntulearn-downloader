@@ -39,7 +39,9 @@ def test_parser_accepts_course():
 def test_parser_accepts_short_and_full_year_and_semester():
     parser = build_parser()
     short = parser.parse_args(["--all", "-y", "25", "-s", "1"])
+    short_end = parser.parse_args(["--all", "-y", "26", "-s", "1"])
     full = parser.parse_args(["--all", "--year", "2025", "--semester", "1"])
 
     assert short.year == full.year == 2025
+    assert short_end.year == 2026
     assert short.semester == full.semester == 1
